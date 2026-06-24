@@ -1,23 +1,23 @@
+# controller_config.yaml
 controller_manager:
   ros__parameters:
-    update_rate: 50
+    update_rate: 200
+
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
+
     left_wheel_controller:
-      type: effort_controllers/JointGroupEffortController
+      type: velocity_controllers/JointGroupVelocityController
+
     right_wheel_controller:
-      type: effort_controllers/JointGroupEffortController
+      type: velocity_controllers/JointGroupVelocityController
 
 left_wheel_controller:
   ros__parameters:
     joints:
       - left_wheel_joint
-    command_interfaces:
-      - effort
 
 right_wheel_controller:
   ros__parameters:
     joints:
       - right_wheel_joint
-    command_interfaces:
-      - effort

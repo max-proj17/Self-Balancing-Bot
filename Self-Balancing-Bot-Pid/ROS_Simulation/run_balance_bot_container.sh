@@ -1,11 +1,9 @@
 #!/bin/bash
 
-IMAGE_NAME=balance-bot-sim-env
+IMAGE_NAME=balance-bot-sim
 CONTAINER_NAME=balance-bot-sim-container
 WORKSPACE_DIR=$(pwd)/ros2_ws
 
-# setting DISPLAY manually (for X11 forwarding)
-export DISPLAY=$(ip route | awk '/default/ {print $3}'):0
 xhost +local:docker
 
 # Kill old container if running

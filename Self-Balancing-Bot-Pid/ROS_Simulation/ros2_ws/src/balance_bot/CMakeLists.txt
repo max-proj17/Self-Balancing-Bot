@@ -15,8 +15,16 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 # Executable: Simple Subscriber Node
-add_executable(balance_bot src/balance_controller.cpp)
+add_executable(balance_bot
+        src/balance_controller.cpp
+        src/kalman_filter.cpp
+)
+
 ament_target_dependencies(balance_bot rclcpp std_msgs sensor_msgs tf2 tf2_ros)
+
+target_include_directories(balance_bot PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 # Install targets
 install(TARGETS

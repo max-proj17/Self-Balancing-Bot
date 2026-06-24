@@ -1,0 +1,193 @@
+<robot name="balance_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="config_file" default="" />
+
+  <material name="body">  <color rgba="0.5 0.5 0.5 1"/> </material>
+  <material name="wheel"> <color rgba="0.2 0.2 0.2 1"/> </material>
+
+
+  <link name="base_link">
+    <visual>
+      <geometry><box size="0.1 0.037 0.171"/></geometry>
+      <origin rpy="0 0 0" xyz="0 0.0 0.0995"/>
+      <material name="body"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.1 0.037 0.171"/></geometry>
+      <origin rpy="0 0 0" xyz="0 0.0 0.0995"/>
+    </collision>
+    <inertial>
+      <mass value="0.514"/>
+      <!-- ixx/iyy/izz for a uniform solid box: m*(h?+d?)/12 etc.         -->
+      <inertia ixx="0.0012568" ixy="0.0" ixz="0.0"
+               iyy="0.001311"  iyz="0.0"
+               izz="0.000487"/>
+      <!-- CoM at geometric center ? matches PyBullet URDF intent          -->
+      <origin rpy="0 0 0" xyz="0 0.0 0.0995"/>
+    </inertial>
+  </link>
+
+
+  <link name="left_wheel">
+    <visual>
+      <geometry><cylinder length="0.026" radius="0.034"/></geometry>
+      <origin rpy="0 1.5707963 0" xyz="0 0 0"/>
+      <material name="wheel"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.026" radius="0.034"/></geometry>
+      <origin rpy="0 1.5707963 0" xyz="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.032"/>
+      <inertia ixx="1.3E-05" ixy="0.0" ixz="0.0"
+               iyy="1.3E-05" iyz="0.0"
+               izz="2.3E-05"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </inertial>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <axis xyz="-1 0 0"/>
+    <!-- velocity=100 rad/s is a generous hardware ceiling (not a control  -->
+    <!-- limit); MAX_VEL=50 in the controller is the effective cap.         -->
+    <limit effort="25.0" velocity="100.0"/>
+    <origin rpy="0 0 0" xyz="-0.074 0.0 0.034"/>
+  </joint>
+
+
+  <link name="right_wheel">
+    <visual>
+      <geometry><cylinder length="0.026" radius="0.034"/></geometry>
+      <origin rpy="0 1.5707963 0" xyz="0 0 0"/>
+      <material name="wheel"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.026" radius="0.034"/></geometry>
+      <origin rpy="0 1.5707963 0" xyz="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.032"/>
+      <inertia ixx="1.3E-05" ixy="0.0" ixz="0.0"
+               iyy="1.3E-05" iyz="0.0"
+               izz="2.3E-05"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </inertial>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="25.0" velocity="100.0"/>
+    <origin rpy="0 0 0" xyz="0.074 0.0 0.034"/>
+  </joint>
+
+
+  <gazebo reference="left_wheel">
+    <mu1>5.0</mu1>
+    <mu2>5.0</mu2>
+    <kp>1e6</kp>
+    <kd>10.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo reference="right_wheel">
+    <mu1>5.0</mu1>
+    <mu2>5.0</mu2>
+    <kp>1e6</kp>
+    <kd>10.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+
+  <link name="imu_link">
+    <visual>
+      <geometry><box size="0.03 0.03 0.03"/></geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.05 0.05 0.05"/></geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0.0"   ixz="0.0"   iyz="0.0"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.034" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>200</update_rate>  <!-- raised from 100 -->
+      <visualize>true</visualize>
+      <pose>0 0 0 0 0 0</pose>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>200.0</updateRateHZ>  <!-- raised from 100 -->
+        <gaussianNoise>0.001</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+        <topicName>/imu_plugin/out</topicName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(arg config_file)</parameters>
+    </plugin>
+  </gazebo>
+
+                           -->
+  <ros2_control name="BalanceBotHardware" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+
+    <joint name="left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-50.0</param>  <!-- rad/s; matches MAX_VEL in cpp -->
+        <param name="max"> 50.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-50.0</param>
+        <param name="max"> 50.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+</robot>
