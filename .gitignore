@@ -51,3 +51,12 @@ Self-Balancing-Bot-Pid/Simulation/**/*.log
 Self-Balancing-Bot-Pid/Simulation/**/*.csv
 Self-Balancing-Bot-Pid/Simulation/**/*.bag
 Self-Balancing-Bot-Pid/Simulation/**/*.bag.*
+
+# KiCad
+*-backups/
+fp-info-cache
+*.kicad_prl
+*.lck
+#auto_saved_files#
+*-autosave.*
+_autosave-*
